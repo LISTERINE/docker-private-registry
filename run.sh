@@ -68,6 +68,7 @@ http {
         server {
             listen 80;
             client_max_body_size 0;
+            chunked_transfer_encoding on;
             proxy_set_header Host \$http_host;
             proxy_set_header X-Forwarded-Host \$host;
             proxy_set_header X-Real-IP \$remote_addr;
@@ -78,6 +79,7 @@ http {
                 auth_basic "$REGISTRY_NAME";
                 auth_basic_user_file $PASSWORD_FILE;
                 proxy_pass http://registry;
+                proxy_read_timeout 900;
             }
             location /v1/_ping {
                 auth_basic off;
@@ -112,6 +114,7 @@ if [ ! -z "$SSL_CERT_PATH" ]; then
             ssl_certificate $SSL_CERT_PATH;
             ssl_certificate_key $SSL_CERT_KEY_PATH;
             client_max_body_size 0;
+            chunked_transfer_encoding on;
             proxy_set_header Host \$http_host;
             proxy_set_header X-Forwarded-Host \$host;
             proxy_set_header X-Real-IP \$remote_addr;
@@ -122,6 +125,7 @@ if [ ! -z "$SSL_CERT_PATH" ]; then
                 auth_basic "$REGISTRY_NAME";
                 auth_basic_user_file $PASSWORD_FILE;
                 proxy_pass http://registry;
+                proxy_read_timeout 900;
             }
             location /v1/_ping {
                 auth_basic off;
@@ -200,8 +204,7 @@ stopsignal=QUIT
 [program:registry]
 priority=10
 user=root
-command=gunicorn --access-logfile - --debug --max-requests 5000 --graceful-timeout 3600 -t 3600 -k gevent -b 0.0.0.0:5000 -w 4 wsgi:application
-directory=/docker-registry
+command=docker-registry
 autostart=true
 autorestart=true
 stopsignal=QUIT
@@ -229,8 +232,13 @@ if [ ! -e $PASSWORD_FILE ] ; then
     htpasswd -bc $PASSWORD_FILE admin $ADMIN_PASSWORD    
 fi
 
-# configure registry
-cd /docker-registry
-bash setup-configs.sh
+# Compatibility with older version's shipyard/docker-registry environment variables
+export AWS_BUCKET=${AWS_BUCKET:-$S3_BUCKET}
+export AWS_KEY=${AWS_KEY:-$AWS_ACCESS_KEY_ID}
+export AWS_SECRET=${AWS_SECRET:-$AWS_SECRET_KEY}
+export AWS_ENCRYPT=${AWS_ENCRYPT:-$S3_ENCRYPT}
+export AWS_SECURE=${AWS_SECURE:-$S3_SECURE}
+export OS_CONTAINER=${OS_CONTAINER:-$SWIFT_CONTAINER}
+
 # run supervisor
 supervisord -c /etc/supervisor/supervisor.conf -n
