@@ -1,6 +1,13 @@
 # Docker Registry (private)
 This uses the `stackbrew/registry` as a base and adds basic auth via Nginx.
 
+# Changes in this fork
+* Removed non-ssl access
+* Added run script
+
+# Planned additions
+* Add pages for GUI management of registry
+
 # Usage
 To run a private registry, launch a container from this image and bind a volume
 with your SSL cert and key and then specify environment variables to define the
