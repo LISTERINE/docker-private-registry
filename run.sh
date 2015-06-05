@@ -6,6 +6,7 @@ SSL_CERT_KEY_PATH=${SSL_CERT_KEY_PATH:-}
 CACHE_REDIS_PASSWORD=${REDIS_PASSWORD:-docker}
 CACHE_LRU_REDIS_PASSWORD=${REDIS_PASSWORD:-docker}
 PASSWORD_FILE=${USER_DB:-/etc/registry.users}
+HTTPS_PORT=${HTTPS_PORT:-5001}
 
 export CACHE_REDIS_PASSWORD
 export CACHE_LRU_REDIS_PASSWORD
@@ -59,101 +60,55 @@ http {
 	##
 	# Virtual Host Configs
 	##
-        upstream manage {
-          server localhost:4000;
-        }
-        upstream registry {
-          server localhost:5000;
-        }
-        server {
-            listen 80;
-            client_max_body_size 0;
-            chunked_transfer_encoding on;
-            proxy_set_header Host \$http_host;
-            proxy_set_header X-Forwarded-Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Scheme \$scheme;
-            proxy_set_header Authorization  "";
-            location / {
-                auth_basic "$REGISTRY_NAME";
-                auth_basic_user_file $PASSWORD_FILE;
-                proxy_pass http://registry;
-                proxy_read_timeout 900;
-            }
-            location /v1/_ping {
-                auth_basic off;
-                proxy_pass http://registry;
-            }
-            location /v1/users {
-                auth_basic off;
-                proxy_pass http://registry;
-            }
-            location /static {
-                alias /app/static;
-                expires 1d;
-            }
-            location = /manage { rewrite ^ /manage/; }
-            location /manage/ { try_files \$uri @manage; }
-            location @manage {
-                auth_basic "$REGISTRY_NAME";
-                auth_basic_user_file $PASSWORD_FILE;
-                proxy_redirect off;
-                include uwsgi_params;
-                uwsgi_param SCRIPT_NAME /manage;
-                uwsgi_modifier1 30;
-                uwsgi_pass unix:/tmp/uwsgi-manage.sock;
-            }
-        }
-EOF
-if [ ! -z "$SSL_CERT_PATH" ]; then
-    cat << EOF >> /usr/local/openresty/nginx/conf/registry.conf
-        server {
-            listen 443;
-            ssl on;
-            ssl_certificate $SSL_CERT_PATH;
-            ssl_certificate_key $SSL_CERT_KEY_PATH;
-            client_max_body_size 0;
-            chunked_transfer_encoding on;
-            proxy_set_header Host \$http_host;
-            proxy_set_header X-Forwarded-Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Scheme \$scheme;
-            proxy_set_header Authorization  "";
-            location / {
-                auth_basic "$REGISTRY_NAME";
-                auth_basic_user_file $PASSWORD_FILE;
-                proxy_pass http://registry;
-                proxy_read_timeout 900;
-            }
-            location /v1/_ping {
-                auth_basic off;
-                proxy_pass http://registry;
-            }
-            location /v1/users {
-                auth_basic off;
-                proxy_pass http://registry;
-            }
-            location /static {
-                alias /app/static;
-                expires 1d;
-            }
-            location = /manage { rewrite ^ /manage/; }
-            location /manage/ { try_files \$uri @manage; }
-            location @manage {
-                auth_basic "$REGISTRY_NAME";
-                auth_basic_user_file $PASSWORD_FILE;
-                proxy_redirect off;
-                include uwsgi_params;
-                uwsgi_param SCRIPT_NAME /manage;
-                uwsgi_modifier1 30;
-                uwsgi_pass unix:/tmp/uwsgi-manage.sock;
-            }
-        }
-EOF
-fi
-cat << EOF >> /usr/local/openresty/nginx/conf/registry.conf
+	upstream manage {
+	  server localhost:4000;
+	}
+	upstream registry {
+	  server localhost:5000;
+	}
+	server {
+		listen $HTTPS_PORT;
+		ssl on;
+		ssl_certificate $SSL_CERT_PATH;
+		ssl_certificate_key $SSL_CERT_KEY_PATH;
+		client_max_body_size 0;
+		chunked_transfer_encoding on;
+		proxy_set_header Host \$http_host;
+		proxy_set_header X-Forwarded-Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_set_header X-Scheme \$scheme;
+		proxy_set_header Authorization  "";
+		location / {
+			auth_basic "$REGISTRY_NAME";
+			auth_basic_user_file $PASSWORD_FILE;
+			proxy_pass http://registry;
+			proxy_read_timeout 900;
+		}
+		location /v1/_ping {
+			auth_basic off;
+			proxy_pass http://registry;
+		}
+		location /v1/users {
+			auth_basic off;
+			proxy_pass http://registry;
+		}
+		location /static {
+			alias /app/static;
+			expires 1d;
+		}
+		location = /manage { rewrite ^ /manage/; }
+		location /manage/ { try_files \$uri @manage; }
+		location @manage {
+			auth_basic "$REGISTRY_NAME";
+			auth_basic_user_file $PASSWORD_FILE;
+			proxy_redirect off;
+			include uwsgi_params;
+			uwsgi_param SCRIPT_NAME /manage;
+			uwsgi_modifier1 30;
+			uwsgi_pass unix:/tmp/uwsgi-manage.sock;
+		}
+	}
 }
 EOF
 
@@ -229,7 +184,7 @@ EOF
 
 # create password file if needed
 if [ ! -e $PASSWORD_FILE ] ; then
-    htpasswd -bc $PASSWORD_FILE admin $ADMIN_PASSWORD    
+    htpasswd -bc $PASSWORD_FILE admin $ADMIN_PASSWORD
 fi
 
 # Compatibility with older version's shipyard/docker-registry environment variables
