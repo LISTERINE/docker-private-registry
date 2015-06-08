@@ -53,4 +53,8 @@ To run with Amazon S3 as the backing store, you will need the following environm
 * `SETTINGS_FLAVOR`: This must be set to `prod`
 
 # Generating your keys
-* sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /opt/registry_ssl/shipyard-registry.key -out /opt/registry_ssl/shipyard-registry.cert
+* sudo openssl genrsa -des3 -out /opt/registry_ssl/shipyard-registry.key 2048
+* sudo openssl req -new -key /opt/registry_ssl/shipyard-registry.key -out /opt/registry_ssl/shipyard-registry.csr
+* sudo cp /opt/registry_ssl/shipyard-registry.key /opt/registry_ssl/shipyard-registry.key.org
+* sudo openssl rsa -in /opt/registry_ssl/shipyard-registry.key.org -out /opt/registry_ssl/shipyard-registry.key
+* sudo openssl x509 -req -days 365 -in /opt/registry_ssl/shipyard-registry.csr -signkey /opt/registry_ssl/shipyard-registry.key -out /opt/registry_ssl/shipyard-registry.cert
