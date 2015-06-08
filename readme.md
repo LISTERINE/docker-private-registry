@@ -12,13 +12,17 @@ This uses the `stackbrew/registry` as a base and adds basic auth via Nginx.
 # Usage
 To run a private registry, launch a container from this image and bind a volume
 with your SSL cert and key and then specify environment variables to define the
-certificate and key in the container.  For example:
-
-`docker run -i -t -p 5001:5001 -v /path/to/cert_and_key:/opt/ssl -e SSL_CERT_PATH=/opt/ssl/cert.crt -e SSL_CERT_KEY_PATH=/opt/ssl/cert.key shipyard/docker-private-registry`
-
-You can also edit docker_run.sh to your liking and run:
+certificate and key in the container. This is contained in:
 
 `sh docker-run.sh`
+
+Don't forget to build the image from the included Dockerfile. While in the directory with the Dockerfile, run:
+
+`docker build -t shipyard:private-registry .`
+
+or customize docker-run.sh to your liking:
+
+`docker run -i -t -p 5001:5001 -v /path/to/cert_and_key:/opt/ssl -e SSL_CERT_PATH=/opt/ssl/cert.crt -e SSL_CERT_KEY_PATH=/opt/ssl/cert.key shipyard/docker-private-registry`
 
 # SSL
 Until https://github.com/dotcloud/docker/pull/2687 is fixed, a valid (from a
