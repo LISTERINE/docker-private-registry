@@ -16,4 +16,5 @@ env CACHE_REDIS_HOST 127.0.0.1
 env CACHE_REDIS_PORT 6379
 env CACHE_LRU_REDIS_HOST 127.0.0.1
 env CACHE_LRU_REDIS_PORT 6379
+expose 5001
 cmd ["/usr/local/bin/run"]
