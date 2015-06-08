@@ -45,7 +45,10 @@ the password at run via environment variables (see below).
 * `HTTPS_PORT`: Port on wich to access services (default: 5001)
 
 # Ports
+Container:
 * 5000 registry
+* 5001 (or specified) nginx
+Exposed on host:
 * 5001 (or specified) nginx
 
 # Running on S3
