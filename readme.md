@@ -7,6 +7,7 @@ This uses the `stackbrew/registry` as a base and adds basic auth via Nginx.
 
 # Planned additions
 * Add pages for GUI management of registry
+* Add support for registry v2.0
 
 # Usage
 To run a private registry, launch a container from this image and bind a volume
