@@ -4,6 +4,7 @@ This uses the `stackbrew/registry` as a base and adds basic auth via Nginx.
 # Changes in this fork
 * Removed non-ssl access
 * Added run script
+* Flask debug turned off by default
 
 # Planned additions
 * Add pages for GUI management of registry
