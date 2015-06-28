@@ -1,4 +1,4 @@
-from registry
+from registry:2.0
 maintainer Shipyard Project "http://shipyard-project.com"
 run apt-get update
 run apt-get -y upgrade
@@ -16,4 +16,5 @@ env CACHE_REDIS_HOST 127.0.0.1
 env CACHE_REDIS_PORT 6379
 env CACHE_LRU_REDIS_HOST 127.0.0.1
 env CACHE_LRU_REDIS_PORT 6379
+entrypoint ["/bin/bash"]
 cmd ["/usr/local/bin/run"]

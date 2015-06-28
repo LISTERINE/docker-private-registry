@@ -2,6 +2,7 @@
 This uses the `stackbrew/registry` as a base and adds basic auth via Nginx.
 
 # Changes in this fork
+* Running on Registry 2.0
 * Removed non-ssl access
 * Added run script
 

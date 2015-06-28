@@ -159,7 +159,7 @@ stopsignal=QUIT
 [program:registry]
 priority=10
 user=root
-command=docker-registry
+command=registry $DISTRIBUTION_DIR/cmd/registry/config.yml
 autostart=true
 autorestart=true
 stopsignal=QUIT
