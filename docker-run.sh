@@ -1,1 +1,1 @@
-docker run -d -p 5001:5001 --name shipyard-registry -v /opt/registry_ssl:/opt/ssl -e SSL_CERT_PATH=/opt/ssl/shipyard-registry.cert -e SSL_CERT_KEY_PATH=/opt/ssl/shipyard-registry.key shipyard-registry
+docker run -d -p 5443:5443 -p 443:443 --name shipyard-registry -v /opt/registry_ssl:/opt/ssl -e SSL_CERT_PATH=/opt/ssl/shipyard-registry.cert -e SSL_CERT_KEY_PATH=/opt/ssl/shipyard-registry.key reg2_test2

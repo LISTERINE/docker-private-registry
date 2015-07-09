@@ -6,7 +6,7 @@ SSL_CERT_KEY_PATH=${SSL_CERT_KEY_PATH:-}
 CACHE_REDIS_PASSWORD=${REDIS_PASSWORD:-docker}
 CACHE_LRU_REDIS_PASSWORD=${REDIS_PASSWORD:-docker}
 PASSWORD_FILE=${USER_DB:-/etc/registry.users}
-HTTPS_PORT=${HTTPS_PORT:-5001}
+HTTPS_PORT=${HTTPS_PORT:-5443}
 
 export CACHE_REDIS_PASSWORD
 export CACHE_LRU_REDIS_PASSWORD
@@ -159,7 +159,7 @@ stopsignal=QUIT
 [program:registry]
 priority=10
 user=root
-command=registry $DISTRIBUTION_DIR/cmd/registry/config.yml
+command=docker-registry
 autostart=true
 autorestart=true
 stopsignal=QUIT

@@ -16,11 +16,15 @@ from flask import (Flask, redirect, request, abort, render_template, url_for,
 import os
 import htpasswd
 from htpasswd.basic import UserExists, UserNotExists
+import requests
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', '1f214b8e0330ba5a39d6304')
 
 USER_DB = os.getenv('USER_DB', '/etc/registry.users')
+
+registry_url = "http://localhost:5000/v1/"
 
 @app.route("/")
 def index():
@@ -73,5 +77,33 @@ def change_password(username=None):
             flash('Error: unknown user', 'danger')
     return redirect(url_for('index'))
 
+@app.route('/raw/<path:registry_path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'])
+def raw(registry_path):
+    target_url = registry_url+registry_path
+    registry_response = {}
+    if request.method == "GET":
+        target_url = target_url+"?"+request.query_string if request.query_string else target_url
+        registry_response = requests.get(target_url).json()
+    elif request.method == "POST":
+        registry_response = requests.post(target_url, json=request.get_json())
+    elif request.method == "PUT":
+        registry_response = requests.put(target_url, json=request.get_json())
+    else:
+        registry_response = {"success":False, "reason":"unsupported method"}
+    return json.dumps(registry_response)
+
+@app.route('/registry/repos')
+def repositories():
+    repos = []
+    response = requests.get(registry_url+'search').json()
+    for result in response['results']:
+        repo, image = result['name'].split('/')
+        repos.append({"repository": repo, "image": image})
+    return json.dumps({"data":repos})
+
+@app.route('/registry')
+def registry():
+    return render_template('registry.html')
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=False)
+    app.run(host="0.0.0.0", debug=True)
