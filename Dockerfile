@@ -1,8 +1,8 @@
-from registry:2.0
+from registry
 maintainer Shipyard Project "http://shipyard-project.com"
 run apt-get update
 run apt-get -y upgrade
-run apt-get install -y apache2-utils supervisor python-setuptools make g++ libpcre3-dev wget libssl-dev libreadline-dev perl redis-server python-dev
+run apt-get install -y apache2-utils supervisor python-setuptools make g++ libpcre3-dev wget libssl-dev libreadline-dev perl redis-server python-dev vim curl
 run wget http://openresty.org/download/ngx_openresty-1.4.3.6.tar.gz -O /tmp/nginx.tar.gz
 run (cd /tmp && tar zxf nginx.tar.gz && cd ngx_* && ./configure --with-luajit && make && make install)
 run echo "uwsgi_param   UWSGI_SCHEME     \$scheme;" >> /usr/local/openresty/nginx/uwsgi_params

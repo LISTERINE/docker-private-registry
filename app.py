@@ -24,7 +24,7 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', '1f214b8e0330ba5a39d6304')
 
 USER_DB = os.getenv('USER_DB', '/etc/registry.users')
 
-registry_url = "http://localhost:5000/v1/"
+registry_url = "http://localhost:5000/v1"
 
 @app.route("/")
 def index():
@@ -79,7 +79,7 @@ def change_password(username=None):
 
 @app.route('/raw/<path:registry_path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'])
 def raw(registry_path):
-    target_url = registry_url+registry_path
+    target_url = '/'.join([registry_url,registry_path])
     registry_response = {}
     if request.method == "GET":
         target_url = target_url+"?"+request.query_string if request.query_string else target_url
@@ -95,11 +95,16 @@ def raw(registry_path):
 @app.route('/registry/repos')
 def repositories():
     repos = []
-    response = requests.get(registry_url+'search').json()
+    response = requests.get('/'.join([registry_url,'search'])).json()
     for result in response['results']:
         repo, image = result['name'].split('/')
         repos.append({"repository": repo, "image": image})
     return json.dumps({"data":repos})
+
+@app.route('/registry/<repo>/tags')
+def repo_tags(repo):
+    response = requests.get('/'.join([registry_url,"repositories",repo,"tags"])).json()
+    return json.dumps({"data":response})
 
 @app.route('/registry')
 def registry():
